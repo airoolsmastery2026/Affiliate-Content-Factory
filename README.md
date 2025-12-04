@@ -1,11 +1,41 @@
-<div align="center">
+# Affiliate Content Factory
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+A Next.js application that leverages **Gemini 2.0** for analysis and **OpenAI GPT-4** for content generation to create viral affiliate marketing scripts.
 
-  <h1>Built with AI Studio</h2>
+## Stack
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+- **Framework**: Next.js 14 (Pages Router)
+- **Styling**: Tailwind CSS
+- **AI Models**: Google Gemini 2.0 Flash, OpenAI GPT-4
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Getting Started
 
-</div>
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+
+2.  **Environment Variables**:
+    Create a `.env.local` file in the root directory:
+    ```env
+    GEMINI_API_KEY=your_gemini_key
+    OPENAI_API_KEY=your_openai_key
+    ```
+
+3.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
+    Access the app at `http://localhost:3000`.
+
+## Deploy to Vercel
+
+1.  Push code to GitHub.
+2.  Import project into Vercel.
+3.  Add `GEMINI_API_KEY` and `OPENAI_API_KEY` in Vercel Project Settings > Environment Variables.
+4.  Deploy.
+
+## Troubleshooting
+
+- **504 Gateway Timeout**: The generation process involves two sequential AI calls. On Vercel Hobby tier (10s limit), this might timeout. Upgrade to Pro or use Edge Functions if needed.
+- **JSON Parse Error**: AI models may occasionally output malformed JSON. The API includes basic cleaning, but retrying usually fixes it.

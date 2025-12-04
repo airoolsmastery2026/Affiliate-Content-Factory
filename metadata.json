@@ -1,0 +1,5 @@
+{
+  "name": "Affiliate Content Factory",
+  "description": "A Next.js application that generates affiliate content scripts using Gemini for analysis and OpenAI for content creation.",
+  "requestFramePermissions": []
+}
