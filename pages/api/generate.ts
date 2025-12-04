@@ -108,18 +108,22 @@ export default async function handler(
   const openaiApiKey = process.env.OPENAI_API_KEY;
 
   if (!geminiApiKey || !openaiApiKey) {
+    console.error("Missing API Keys");
     return res.status(500).json({ message: 'Server configuration error: Missing API Keys.' });
   }
 
   try {
     // --- 1. GEMINI ANALYSIS ---
+    // Initialize Gemini Client
     const googleAI = new GoogleGenAI({ apiKey: geminiApiKey });
+    
     const geminiPrompt = GEMINI_ANALYZE_PROMPT_TEMPLATE
       .replace('{{RAW_TEXT}}', rawText)
-      .replace(/{{NICHE}}/g, niche); // Global replace for safety
+      .replace(/{{NICHE}}/g, niche);
 
+    // Call Gemini 2.0 Flash
     const geminiResponse = await googleAI.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.0-flash', 
       contents: geminiPrompt,
       config: {
         responseMimeType: 'application/json',
@@ -135,22 +139,24 @@ export default async function handler(
     try {
       geminiJson = JSON.parse(geminiText);
     } catch (e) {
-      // Clean markdown code blocks if necessary
+      console.warn("Gemini JSON parse failed, attempting cleanup", geminiText);
       const cleaned = geminiText.replace(/```json/g, '').replace(/```/g, '').trim();
       geminiJson = JSON.parse(cleaned);
     }
 
     // --- 2. OPENAI GENERATION ---
     const openai = new OpenAI({ apiKey: openaiApiKey });
+    
     const openaiPrompt = OPENAI_GENERATE_PROMPT_TEMPLATE
       .replace(/{{NICHE}}/g, niche)
       .replace('{{PLATFORMS}}', JSON.stringify(platforms))
       .replace('{{GEMINI_JSON}}', JSON.stringify(geminiJson));
 
+    // Call OpenAI GPT-4 Turbo (reliable for JSON mode)
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo", // Using gpt-4-turbo for reliability and JSON mode support
+      model: "gpt-4-turbo", 
       messages: [
-        { role: "system", content: "Bạn là chuyên gia sáng tạo nội dung video ngắn." },
+        { role: "system", content: "Bạn là chuyên gia sáng tạo nội dung video ngắn. Luôn trả về JSON hợp lệ." },
         { role: "user", content: openaiPrompt }
       ],
       response_format: { type: "json_object" },
@@ -172,6 +178,10 @@ export default async function handler(
 
   } catch (error: any) {
     console.error('API Error:', error);
-    return res.status(500).json({ message: error.message || 'Internal Server Error', detail: error });
+    // Return detailed error for debugging if needed, or generic message
+    return res.status(500).json({ 
+      message: 'Failed to generate content', 
+      error: error.message || 'Internal Server Error' 
+    });
   }
 }
